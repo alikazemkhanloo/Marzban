@@ -25,12 +25,13 @@ app.add_middleware(
 )
 
 
-from app import dashboard, jobs, views, telegram  # noqa
+# from app import dashboard, jobs, views, telegram  # noqa
+from app import jobs
 
 
-@app.on_event("startup")
-def on_startup():
-    scheduler.start()
+# @app.on_event("startup")
+# def on_startup():
+#     scheduler.start()
 
 
 @app.on_event("shutdown")

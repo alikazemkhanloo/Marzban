@@ -15,7 +15,7 @@ from xray_api.types.account import Account
 USERNAME_REGEXP = re.compile(r"^(?=\w{3,32}\b)[a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)*$")
 
 
-class UserStatus(str, Enum):
+class ClientStatus(str, Enum):
     active = "active"
     disabled = "disabled"
     limited = "limited"
@@ -27,7 +27,7 @@ class UserStatusModify(str, Enum):
     disabled = "disabled"
 
 
-class UserDataLimitResetStrategy(str, Enum):
+class ClientDataLimitResetStrategy(str, Enum):
     no_reset = "no_reset"
     day = "day"
     week = "week"
