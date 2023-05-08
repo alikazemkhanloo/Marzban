@@ -21,11 +21,13 @@ get_user_text = """
 """
 
 
-@bot.message_handler(commands=['usage'])
+@bot.message_handler(commands=["usage"])
 def usage_command(message):
     username = extract_arguments(message.text)
     if not username:
-        return bot.reply_to(message, 'Usage: `/usage <username>`', parse_mode='MarkdownV2')
+        return bot.reply_to(
+            message, "Usage: `/usage <username>`", parse_mode="MarkdownV2"
+        )
 
     with GetDB() as db:
         dbuser = crud.get_user(db, username)
@@ -37,11 +39,13 @@ def usage_command(message):
         text = get_user_text.format(
             username=user.username,
             status=user.status,
-            traffic_limit=readable_size(user.data_limit) if user.data_limit else '-',
+            traffic_limit=readable_size(user.data_limit) if user.data_limit else "-",
             used_traffic=readable_size(user.used_traffic),
-            expires_at=datetime.fromtimestamp(user.expire, UTC).strftime('%m/%d/%Y') if user.expire else '-',
-            created_at=user.created_at.strftime('%m/%d/%Y'),
-            protocols=','.join(user.proxies.keys())
+            expires_at=datetime.fromtimestamp(user.expire, UTC).strftime("%m/%d/%Y")
+            if user.expire
+            else "-",
+            created_at=user.created_at.strftime("%m/%d/%Y"),
+            protocols=",".join(user.proxies.keys()),
         )
 
-    return bot.reply_to(message, text, parse_mode='MarkdownV2')
+    return bot.reply_to(message, text, parse_mode="MarkdownV2")

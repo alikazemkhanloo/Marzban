@@ -24,7 +24,7 @@ def upgrade() -> None:
             "security",
             sa.Enum("inbound_default", "none", "tls", name="proxyhostsecurity"),
             nullable=False,
-            server_default="inbound_default"
+            server_default="inbound_default",
         ),
     )
 

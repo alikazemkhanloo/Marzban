@@ -70,19 +70,23 @@ class Stats(XRayBase):
             frees=r.Frees,
             live_objects=r.LiveObjects,
             pause_total_ns=r.PauseTotalNs,
-            uptime=r.Uptime
+            uptime=r.Uptime,
         )
 
-    def query_stats(self, pattern: str, reset: bool = False) -> typing.Iterable[StatResponse]:
+    def query_stats(
+        self, pattern: str, reset: bool = False
+    ) -> typing.Iterable[StatResponse]:
         try:
             stub = command_pb2_grpc.StatsServiceStub(self._channel)
-            r = stub.QueryStats(command_pb2.QueryStatsRequest(pattern=pattern, reset=reset))
+            r = stub.QueryStats(
+                command_pb2.QueryStatsRequest(pattern=pattern, reset=reset)
+            )
 
         except grpc.RpcError as e:
             raise RelatedError(e)
 
         for stat in r.stat:
-            type, name, _, link = stat.name.split('>>>')
+            type, name, _, link = stat.name.split(">>>")
             yield StatResponse(name, type, link, stat.value)
 
     def get_users_stats(self, reset: bool = False) -> typing.Iterable[StatResponse]:
@@ -94,30 +98,36 @@ class Stats(XRayBase):
     def get_outbounds_stats(self, reset: bool = False) -> typing.Iterable[StatResponse]:
         return self.query_stats("outbound>>>", reset=reset)
 
-    def get_user_stats(self, email: str, reset: bool = False) -> typing.Iterable[StatResponse]:
+    def get_user_stats(
+        self, email: str, reset: bool = False
+    ) -> typing.Iterable[StatResponse]:
         uplink, downlink = 0, 0
         for stat in self.query_stats(f"user>>>{email}>>>", reset=reset):
-            if stat.link == 'uplink':
+            if stat.link == "uplink":
                 uplink = stat.value
-            if stat.link == 'downlink':
+            if stat.link == "downlink":
                 downlink = stat.value
 
         return UserStatsResponse(email=email, uplink=uplink, downlink=downlink)
 
-    def get_inbound_stats(self, tag: str, reset: bool = False) -> typing.Iterable[StatResponse]:
+    def get_inbound_stats(
+        self, tag: str, reset: bool = False
+    ) -> typing.Iterable[StatResponse]:
         uplink, downlink = 0, 0
         for stat in self.query_stats(f"inbound>>>{tag}>>>", reset=reset):
-            if stat.link == 'uplink':
+            if stat.link == "uplink":
                 uplink = stat.value
-            if stat.link == 'downlink':
+            if stat.link == "downlink":
                 downlink = stat.value
         return InboundStatsResponse(tag=tag, uplink=uplink, downlink=downlink)
 
-    def get_outbound_stats(self, tag: str, reset: bool = False) -> typing.Iterable[StatResponse]:
+    def get_outbound_stats(
+        self, tag: str, reset: bool = False
+    ) -> typing.Iterable[StatResponse]:
         uplink, downlink = 0, 0
         for stat in self.query_stats(f"outbound>>>{tag}>>>", reset=reset):
-            if stat.link == 'uplink':
+            if stat.link == "uplink":
                 uplink = stat.value
-            if stat.link == 'downlink':
+            if stat.link == "downlink":
                 downlink = stat.value
         return OutboundStatsResponse(tag=tag, uplink=uplink, downlink=downlink)

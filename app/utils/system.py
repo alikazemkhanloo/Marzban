@@ -7,14 +7,14 @@ import psutil
 
 
 @dataclass
-class MemoryStat():
+class MemoryStat:
     total: int
     used: int
     free: int
 
 
 @dataclass
-class CPUStat():
+class CPUStat:
     cores: int
     percent: int
 
@@ -35,7 +35,7 @@ def random_password() -> str:
 def check_port(port: int) -> bool:
     s = socket.socket()
     try:
-        s.connect(('127.0.0.1', port))
+        s.connect(("127.0.0.1", port))
         return True
     except socket.error:
         return False
@@ -50,4 +50,4 @@ def readable_size(size_bytes):
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
-    return f'{s} {size_name[i]}'
+    return f"{s} {size_name[i]}"

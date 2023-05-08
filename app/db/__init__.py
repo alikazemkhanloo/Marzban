@@ -37,7 +37,7 @@ from .crud import (  # noqa
     create_admin,
     update_admin,
     remove_admin,
-    get_admins
+    get_admins,
 )
 
 
@@ -58,14 +58,11 @@ __all__ = [
     "update_admin",
     "remove_admin",
     "get_admins",
-
     "GetDB",
     "get_db",
-
     "User",
     "System",
     "JWT",
-
     "Base",
     "Session",
 ]

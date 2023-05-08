@@ -12,7 +12,9 @@ from fastapi import Depends, HTTPException
 
 
 @app.get("/api/system", tags=["System"], response_model=SystemStats)
-def get_system_stats(db: Session = Depends(get_db), admin: Admin = Depends(Admin.get_current)):
+def get_system_stats(
+    db: Session = Depends(get_db), admin: Admin = Depends(Admin.get_current)
+):
     mem = memory_usage()
     system = crud.get_system_usage(db)
 
@@ -33,12 +35,16 @@ def get_system_stats(db: Session = Depends(get_db), admin: Admin = Depends(Admin
     )
 
 
-@app.get('/api/inbounds', tags=["System"], response_model=Dict[ProxyTypes, List[ProxyInbound]])
+@app.get(
+    "/api/inbounds",
+    tags=["System"],
+    response_model=Dict[ProxyTypes, List[ProxyInbound]],
+)
 def get_inbounds(admin: Admin = Depends(Admin.get_current)):
     return xray.config.inbounds_by_protocol
 
 
-@app.get('/api/hosts', tags=["System"], response_model=Dict[str, List[ProxyHost]])
+@app.get("/api/hosts", tags=["System"], response_model=Dict[str, List[ProxyHost]])
 def get_hosts(db: Session = Depends(get_db), admin: Admin = Depends(Admin.get_current)):
     hosts = {}
     for inbound_tag in xray.config.inbounds_by_tag:
@@ -47,19 +53,25 @@ def get_hosts(db: Session = Depends(get_db), admin: Admin = Depends(Admin.get_cu
     return hosts
 
 
-@app.put('/api/hosts', tags=["System"], response_model=Dict[str, List[ProxyHost]])
-def modify_hosts(modified_hosts: Dict[str, List[ProxyHost]],
-                 db: Session = Depends(get_db),
-                 admin: Admin = Depends(Admin.get_current)):
+@app.put("/api/hosts", tags=["System"], response_model=Dict[str, List[ProxyHost]])
+def modify_hosts(
+    modified_hosts: Dict[str, List[ProxyHost]],
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(Admin.get_current),
+):
     if not admin.is_sudo:
         raise HTTPException(status_code=403, detail="You're not allowed")
 
     # validate
     for inbound_tag, hosts in modified_hosts.items():
         if not xray.config.inbounds_by_tag.get(inbound_tag):
-            raise HTTPException(status_code=400, detail=f"Inbound {inbound_tag} doesn't exist")
+            raise HTTPException(
+                status_code=400, detail=f"Inbound {inbound_tag} doesn't exist"
+            )
         if not hosts:
-            raise HTTPException(status_code=400, detail=f"Inbound {inbound_tag} hosts cannot be empty")
+            raise HTTPException(
+                status_code=400, detail=f"Inbound {inbound_tag} hosts cannot be empty"
+            )
 
     for inbound_tag, hosts in modified_hosts.items():
         crud.update_hosts(db, inbound_tag, hosts)

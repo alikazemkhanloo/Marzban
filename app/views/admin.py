@@ -25,9 +25,10 @@ def authenticate_admin(db: Session, username: str, password: str):
     return admin.verify_password(password)
 
 
-@app.post("/api/admin/token", tags=['Admin'], response_model=Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
-                           db: Session = Depends(get_db)):
+@app.post("/api/admin/token", tags=["Admin"], response_model=Token)
+def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
     if authenticate_sudo(form_data.username, form_data.password):
         return Token(access_token=create_admin_token(form_data.username, is_sudo=True))
 
@@ -41,11 +42,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
     )
 
 
-@ app.post("/api/admin", tags=['Admin'], response_model=Admin)
-def create_admin(new_admin: AdminCreate,
-                 db: Session = Depends(get_db),
-                 admin: Admin = Depends(Admin.get_current)):
-
+@app.post("/api/admin", tags=["Admin"], response_model=Admin)
+def create_admin(
+    new_admin: AdminCreate,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(Admin.get_current),
+):
     if not admin.is_sudo:
         raise HTTPException(status_code=403, detail="You're not allowed")
 
@@ -57,11 +59,13 @@ def create_admin(new_admin: AdminCreate,
     return dbadmin
 
 
-@ app.put("/api/admin/{username}", tags=['Admin'], response_model=Admin)
-def modify_admin(username: str,
-                 modified_admin: AdminModify,
-                 db: Session = Depends(get_db),
-                 admin: Admin = Depends(Admin.get_current)):
+@app.put("/api/admin/{username}", tags=["Admin"], response_model=Admin)
+def modify_admin(
+    username: str,
+    modified_admin: AdminModify,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(Admin.get_current),
+):
     if not (admin.is_sudo or admin.username == username):
         raise HTTPException(status_code=403, detail="You're not allowed")
 
@@ -73,10 +77,12 @@ def modify_admin(username: str,
     return dbadmin
 
 
-@ app.delete("/api/admin/{username}", tags=['Admin'])
-def remove_admin(username: str,
-                 db: Session = Depends(get_db),
-                 admin: Admin = Depends(Admin.get_current)):
+@app.delete("/api/admin/{username}", tags=["Admin"])
+def remove_admin(
+    username: str,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(Admin.get_current),
+):
     if not admin.is_sudo:
         raise HTTPException(status_code=403, detail="You're not allowed")
 
@@ -88,18 +94,19 @@ def remove_admin(username: str,
     return {}
 
 
-@ app.get("/api/admin", tags=['Admin'], response_model=Admin)
+@app.get("/api/admin", tags=["Admin"], response_model=Admin)
 def get_current_admin(admin: Admin = Depends(Admin.get_current)):
     return admin
 
 
-@ app.get("/api/admins", tags=['Admin'], response_model=List[Admin])
-def get_admins(offset: int = None,
-               limit: int = None,
-               username: str = None,
-               db: Session = Depends(get_db),
-               admin: Admin = Depends(Admin.get_current)):
-
+@app.get("/api/admins", tags=["Admin"], response_model=List[Admin])
+def get_admins(
+    offset: int = None,
+    limit: int = None,
+    username: str = None,
+    db: Session = Depends(get_db),
+    admin: Admin = Depends(Admin.get_current),
+):
     if not admin.is_sudo:
         raise HTTPException(status_code=403, detail="You're not allowed")
 

@@ -17,7 +17,9 @@ class Proxyman(XRayBase):
     def alter_inbound(self, tag: str, operation: TypedMessage) -> bool:
         stub = command_pb2_grpc.HandlerServiceStub(self._channel)
         try:
-            stub.AlterInbound(command_pb2.AlterInboundRequest(tag=tag, operation=operation))
+            stub.AlterInbound(
+                command_pb2.AlterInboundRequest(tag=tag, operation=operation)
+            )
             return True
 
         except grpc.RpcError as e:
@@ -26,7 +28,9 @@ class Proxyman(XRayBase):
     def alter_outbound(self, tag: str, operation: TypedMessage) -> bool:
         stub = command_pb2_grpc.HandlerServiceStub(self._channel)
         try:
-            stub.AlterInbound(command_pb2.AlterOutboundRequest(tag=tag, operation=operation))
+            stub.AlterInbound(
+                command_pb2.AlterOutboundRequest(tag=tag, operation=operation)
+            )
             return True
 
         except grpc.RpcError as e:
@@ -38,21 +42,16 @@ class Proxyman(XRayBase):
             operation=Message(
                 command_pb2.AddUserOperation(
                     user=user_pb2.User(
-                        level=user.level,
-                        email=user.email,
-                        account=user.message
+                        level=user.level, email=user.email, account=user.message
                     )
                 )
-            ))
+            ),
+        )
 
     def remove_inbound_user(self, tag: str, email: str) -> bool:
         return self.alter_inbound(
-            tag=tag,
-            operation=Message(
-                command_pb2.RemoveUserOperation(
-                    email=email
-                )
-            ))
+            tag=tag, operation=Message(command_pb2.RemoveUserOperation(email=email))
+        )
 
     def add_outbound_user(self, tag: str, user: Account) -> bool:
         return self.alter_outbound(
@@ -60,21 +59,16 @@ class Proxyman(XRayBase):
             operation=Message(
                 command_pb2.AddUserOperation(
                     user=user_pb2.User(
-                        level=user.level,
-                        email=user.email,
-                        account=user.message
+                        level=user.level, email=user.email, account=user.message
                     )
                 )
-            ))
+            ),
+        )
 
     def remove_outbound_user(self, tag: str, email: str) -> bool:
         return self.alter_outbound(
-            tag=tag,
-            operation=Message(
-                command_pb2.RemoveUserOperation(
-                    email=email
-                )
-            ))
+            tag=tag, operation=Message(command_pb2.RemoveUserOperation(email=email))
+        )
 
     def add_inbound(self):
         raise NotImplementedError

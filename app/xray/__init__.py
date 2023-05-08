@@ -24,11 +24,4 @@ core = XRayCore(XRAY_EXECUTABLE_PATH, XRAY_ASSETS_PATH)
 api = XRay(config.api_host, config.api_port)
 
 
-__all__ = [
-    "config",
-    "core",
-    "api",
-    "exceptions",
-    "exc",
-    "types"
-]
+__all__ = ["config", "core", "api", "exceptions", "exc", "types"]

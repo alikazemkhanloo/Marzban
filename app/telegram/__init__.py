@@ -9,7 +9,7 @@ from telebot import TeleBot, apihelper
 
 bot = None
 if TELEGRAM_API_TOKEN:
-    apihelper.proxy = {'http': TELEGRAM_PROXY_URL, 'https': TELEGRAM_PROXY_URL}
+    apihelper.proxy = {"http": TELEGRAM_PROXY_URL, "https": TELEGRAM_PROXY_URL}
     bot = TeleBot(TELEGRAM_API_TOKEN)
 
 
@@ -18,8 +18,8 @@ def start_bot():
     if bot:
         handler = glob.glob(join(dirname(__file__), "*.py"))
         for file in handler:
-            name = basename(file).replace('.py', '')
-            if name.startswith('_'):
+            name = basename(file).replace(".py", "")
+            if name.startswith("_"):
                 continue
             spec = importlib.util.spec_from_file_location(name, file)
             spec.loader.exec_module(importlib.util.module_from_spec(spec))
@@ -33,7 +33,7 @@ from .report import (  # noqa
     report_new_user,
     report_user_modification,
     report_user_deletion,
-    report_status_change
+    report_status_change,
 )
 
 __all__ = [
@@ -42,5 +42,5 @@ __all__ = [
     "report_new_user",
     "report_user_modification",
     "report_user_deletion",
-    "report_status_change"
+    "report_status_change",
 ]

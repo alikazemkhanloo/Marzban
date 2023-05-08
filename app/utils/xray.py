@@ -36,8 +36,8 @@ def xray_config_include_db_clients(config: XRayConfig):
             }
             for proxy_type, inbound_tags in user.inbounds.items():
                 for inbound_tag in inbound_tags:
-                    config.add_inbound_client(inbound_tag,
-                                              user.username,
-                                              proxies_settings[proxy_type])
+                    config.add_inbound_client(
+                        inbound_tag, user.username, proxies_settings[proxy_type]
+                    )
 
     return config

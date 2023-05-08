@@ -6,16 +6,32 @@ from sqlalchemy.orm import Session
 
 from sqlalchemy.orm import Session
 
-from app.db.models import (JWT, Admin, Proxy, ProxyHost, ProxyInbound, System,
-                           User, UserUsageResetLogs)
+from app.db.models import (
+    JWT,
+    Admin,
+    Proxy,
+    ProxyHost,
+    ProxyInbound,
+    System,
+    User,
+    UserUsageResetLogs,
+)
 from app.models.admin import AdminCreate, AdminModify
 from app.models.proxy import ProxyHost as ProxyHostModify
-from app.models.user import (UserCreate, UserDataLimitResetStrategy,
-                             UserModify, UserStatus)
+from app.models.user import (
+    UserCreate,
+    UserDataLimitResetStrategy,
+    UserModify,
+    UserStatus,
+)
 
 
 def add_default_host(db: Session, inbound: ProxyInbound):
-    host = ProxyHost(remark="🚀 Marz ({USERNAME}) [{TRANSPORT}]", address="{SERVER_IP}", inbound=inbound)
+    host = ProxyHost(
+        remark="🚀 Marz ({USERNAME}) [{TRANSPORT}]",
+        address="{SERVER_IP}",
+        inbound=inbound,
+    )
     db.add(host)
     db.commit()
 
@@ -53,8 +69,9 @@ def update_hosts(db: Session, inbound_tag: str, modified_hosts: List[ProxyHostMo
             sni=host.sni,
             host=host.host,
             inbound=inbound,
-            security=host.security
-        ) for host in modified_hosts
+            security=host.security,
+        )
+        for host in modified_hosts
     ]
     db.commit()
     db.refresh(inbound)
@@ -69,33 +86,38 @@ def get_user_by_id(db: Session, user_id: int):
     return db.query(User).filter(User.id == user_id).first()
 
 
-UsersSortingOptions = Enum('UsersSortingOptions', {
-    'username': User.username.asc(),
-    'used_traffic': User.used_traffic.asc(),
-    'data_limit': User.data_limit.asc(),
-    'expire': User.expire.asc(),
-    'created_at': User.created_at.asc(),
-    '-username': User.username.desc(),
-    '-used_traffic': User.used_traffic.desc(),
-    '-data_limit': User.data_limit.desc(),
-    '-expire': User.expire.desc(),
-    '-created_at': User.created_at.desc(),
-})
+UsersSortingOptions = Enum(
+    "UsersSortingOptions",
+    {
+        "username": User.username.asc(),
+        "used_traffic": User.used_traffic.asc(),
+        "data_limit": User.data_limit.asc(),
+        "expire": User.expire.asc(),
+        "created_at": User.created_at.asc(),
+        "-username": User.username.desc(),
+        "-used_traffic": User.used_traffic.desc(),
+        "-data_limit": User.data_limit.desc(),
+        "-expire": User.expire.desc(),
+        "-created_at": User.created_at.desc(),
+    },
+)
 
 
-def get_users(db: Session,
-              offset: Optional[int] = None,
-              limit: Optional[int] = None,
-              username: Optional[str] = None,
-              status: Optional[Union[UserStatus, list]] = None,
-              sort: Optional[List[UsersSortingOptions]] = None,
-              admin: Optional[Admin] = None,
-              reset_strategy: Optional[Union[UserDataLimitResetStrategy, list]] = None,
-              return_with_count: bool = False) -> Union[List[User], Tuple[List[User], int]]:
+def get_users(
+    db: Session,
+    offset: Optional[int] = None,
+    limit: Optional[int] = None,
+    username: Optional[str] = None,
+    status: Optional[Union[UserStatus, list]] = None,
+    sort: Optional[List[UsersSortingOptions]] = None,
+    admin: Optional[Admin] = None,
+    reset_strategy: Optional[Union[UserDataLimitResetStrategy, list]] = None,
+    return_with_count: bool = False,
+) -> Union[List[User], Tuple[List[User], int]]:
     query = db.query(User)
 
     if username:
-        query = query.filter(User.username.ilike(f'%{username}%'))
+        query = query.filter(User.username.ilike(f"%{username}%"))
 
     if status:
         if isinstance(status, list):
@@ -147,9 +169,11 @@ def create_user(db: Session, user: UserCreate, admin: Admin = None):
             get_or_create_inbound(db, tag) for tag in excluded_inbounds_tags[proxy_type]
         ]
         proxies.append(
-            Proxy(type=proxy_type.value,
-                  settings=settings.dict(no_obj=True),
-                  excluded_inbounds=excluded_inbounds)
+            Proxy(
+                type=proxy_type.value,
+                settings=settings.dict(no_obj=True),
+                excluded_inbounds=excluded_inbounds,
+            )
         )
 
     dbuser = User(
@@ -158,7 +182,7 @@ def create_user(db: Session, user: UserCreate, admin: Admin = None):
         data_limit=(user.data_limit or None),
         expire=(user.expire or None),
         admin=admin,
-        data_limit_reset_strategy=user.data_limit_reset_strategy
+        data_limit_reset_strategy=user.data_limit_reset_strategy,
     )
     db.add(dbuser)
     db.commit()
@@ -175,30 +199,38 @@ def remove_user(db: Session, dbuser: User):
 def update_user(db: Session, dbuser: User, modify: UserModify):
     if modify.proxies:
         for proxy_type, settings in modify.proxies.items():
-            dbproxy = db.query(Proxy) \
-                .where(Proxy.user == dbuser, Proxy.type == proxy_type) \
+            dbproxy = (
+                db.query(Proxy)
+                .where(Proxy.user == dbuser, Proxy.type == proxy_type)
                 .first()
+            )
             if dbproxy:
                 dbproxy.settings = settings.dict(no_obj=True)
             else:
-                dbuser.proxies.append(Proxy(type=proxy_type, settings=settings.dict(no_obj=True)))
+                dbuser.proxies.append(
+                    Proxy(type=proxy_type, settings=settings.dict(no_obj=True))
+                )
         for proxy in dbuser.proxies:
             if proxy.type not in modify.proxies:
                 db.delete(proxy)
 
     if modify.inbounds:
         for proxy_type, tags in modify.excluded_inbounds.items():
-            dbproxy = db.query(Proxy) \
-                .where(Proxy.user == dbuser, Proxy.type == proxy_type) \
+            dbproxy = (
+                db.query(Proxy)
+                .where(Proxy.user == dbuser, Proxy.type == proxy_type)
                 .first()
+            )
             if dbproxy:
-                dbproxy.excluded_inbounds = [get_or_create_inbound(db, tag) for tag in tags]
+                dbproxy.excluded_inbounds = [
+                    get_or_create_inbound(db, tag) for tag in tags
+                ]
 
     if modify.status is not None:
         dbuser.status = modify.status
 
     if modify.data_limit is not None:
-        dbuser.data_limit = (modify.data_limit or None)
+        dbuser.data_limit = modify.data_limit or None
         if dbuser.status not in (UserStatus.expired, UserStatus.disabled):
             if not dbuser.data_limit or dbuser.used_traffic < dbuser.data_limit:
                 dbuser.status = UserStatus.active
@@ -206,7 +238,7 @@ def update_user(db: Session, dbuser: User, modify: UserModify):
                 dbuser.status = UserStatus.limited
 
     if modify.expire is not None:
-        dbuser.expire = (modify.expire or None)
+        dbuser.expire = modify.expire or None
         if dbuser.status not in (UserStatus.limited, UserStatus.disabled):
             if not dbuser.expire or dbuser.expire > datetime.utcnow().timestamp():
                 dbuser.status = UserStatus.active
@@ -256,10 +288,7 @@ def get_admin(db: Session, username: str):
 
 
 def create_admin(db: Session, admin: AdminCreate):
-    dbadmin = Admin(
-        username=admin.username,
-        hashed_password=admin.hashed_password
-    )
+    dbadmin = Admin(username=admin.username, hashed_password=admin.hashed_password)
     db.add(dbadmin)
     db.commit()
     db.refresh(dbadmin)
@@ -279,13 +308,12 @@ def remove_admin(db: Session, dbadmin: Admin):
     return dbadmin
 
 
-def get_admins(db: Session,
-               offset: int = None,
-               limit: int = None,
-               username: str = None):
+def get_admins(
+    db: Session, offset: int = None, limit: int = None, username: str = None
+):
     query = db.query(Admin)
     if username:
-        query = query.filter(User.username.ilike(f'%{username}%'))
+        query = query.filter(User.username.ilike(f"%{username}%"))
     if offset:
         query = query.offset(offset)
     if limit:

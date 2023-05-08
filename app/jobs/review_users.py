@@ -11,7 +11,6 @@ def review():
     now = datetime.utcnow().timestamp()
     with GetDB() as db:
         for user in get_users(db, status=UserStatus.active):
-
             limited = user.data_limit and user.used_traffic >= user.data_limit
             expired = user.expire and user.expire <= now
             if limited:
@@ -30,9 +29,7 @@ def review():
 
                 except xray.exceptions.ConnectionError:
                     try:
-                        xray.core.restart(
-                            xray_config_include_db_clients(xray.config)
-                        )
+                        xray.core.restart(xray_config_include_db_clients(xray.config))
                     except ProcessLookupError:
                         pass
 
@@ -45,7 +42,7 @@ def review():
             except Exception:
                 pass
 
-            logger.info(f"User \"{user.username}\" status changed to {status}")
+            logger.info(f'User "{user.username}" status changed to {status}')
 
 
-scheduler.add_job(review, 'interval', seconds=5)
+scheduler.add_job(review, "interval", seconds=5)

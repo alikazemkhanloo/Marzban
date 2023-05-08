@@ -10,13 +10,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_responses import custom_openapi
 
-app = FastAPI(
-    docs_url='/docs' if DOCS else None,
-    redoc_url='/redoc' if DOCS else None
-)
+app = FastAPI(docs_url="/docs" if DOCS else None, redoc_url="/redoc" if DOCS else None)
 app.openapi = custom_openapi(app)
-scheduler = BackgroundScheduler({'apscheduler.job_defaults.max_instances': 5}, timezone='UTC')
-logger = logging.getLogger('uvicorn.error')
+scheduler = BackgroundScheduler(
+    {"apscheduler.job_defaults.max_instances": 5}, timezone="UTC"
+)
+logger = logging.getLogger("uvicorn.error")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

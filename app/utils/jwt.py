@@ -12,6 +12,7 @@ global JWT_SECRET_KEY
 @app.on_event("startup")
 def set_jwt_secret_key():
     from app.db import JWT, engine, GetDB, get_jwt_secret_key
+
     if sqlalchemy.inspect(engine).has_table(JWT.__tablename__):
         with GetDB() as db:
             global JWT_SECRET_KEY
@@ -32,7 +33,7 @@ def get_admin_payload(token: str) -> Union[dict, None]:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
         username: str = payload.get("sub")
         access: str = payload.get("access")
-        if not username or access not in ('admin', 'sudo'):
+        if not username or access not in ("admin", "sudo"):
             return
 
         return {"username": username, "is_sudo": access == "sudo"}
@@ -41,7 +42,11 @@ def get_admin_payload(token: str) -> Union[dict, None]:
 
 
 def create_subscription_token(username: str) -> str:
-    data = {"sub": username, "access": "subscription", "iat": datetime.utcnow()+timedelta(seconds=1)}
+    data = {
+        "sub": username,
+        "access": "subscription",
+        "iat": datetime.utcnow() + timedelta(seconds=1),
+    }
     encoded_jwt = jwt.encode(data, JWT_SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 
@@ -52,6 +57,9 @@ def get_subscription_payload(token: str) -> Union[dict, None]:
         if payload.get("access") != "subscription":
             return
 
-        return {"username": payload['sub'], "created_at": datetime.utcfromtimestamp(payload['iat'])}
+        return {
+            "username": payload["sub"],
+            "created_at": datetime.utcfromtimestamp(payload["iat"]),
+        }
     except JWTError:
         return
